@@ -54,6 +54,19 @@ self-contained script before upload, the same way `wrangler deploy` bundles a Wo
 **`wrangler` requires Node.js ≥22** — check with `node -v`; the rest of this project
 (`next dev`/`next build`) works fine on Node 20+.
 
+**If deploying via Cloudflare's Git-integration dashboard** (Workers & Pages → this
+project → Settings → Builds), you **must** set:
+
+- Build command: `npm run pages:build`
+- Build output directory: `.open-next/assets`
+
+Unlike Workers, a Pages-shaped `wrangler.jsonc` (one with `pages_build_output_dir`)
+cannot declare its own build command — Cloudflare's config validator rejects a `build`
+field there outright (`Configuration file for Pages projects does not support "build"`).
+Leaving the dashboard's Build command unset (or at its default) skips the build step
+entirely and fails with `Output directory ".open-next/assets" not found`, since nothing
+ever produced it.
+
 ```bash
 npm run pages:preview   # build + run locally under a real Pages/Workers runtime (no Cloudflare account needed)
 npx wrangler login      # one-time, opens a browser to authenticate

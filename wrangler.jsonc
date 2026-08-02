@@ -6,14 +6,11 @@
 	// every request through it instead of doing normal file-based static routing.
 	// See README.md "Deploying to Cloudflare Pages".
 	"pages_build_output_dir": ".open-next/assets",
-	// Cloudflare Pages' wrangler-config-aware builder (BETA) reads this file for
-	// pages_build_output_dir/vars but does NOT run a build unless told to — without
-	// this, it skips straight to checking for .open-next/assets, which doesn't exist
-	// yet, and fails with "Output directory ... not found". If your dashboard project
-	// also has an explicit Build command set, that one wins; this is the fallback.
-	"build": {
-		"command": "npm run pages:build"
-	},
+	// Cloudflare's Pages config validator explicitly rejects a "build" field here
+	// ("Configuration file for Pages projects does not support \"build\"") — that's a
+	// Workers-only concept. For Pages, the Build command MUST be set on the dashboard
+	// instead: Workers & Pages → this project → Settings → Builds → Build command =
+	// `npm run pages:build`. See README.md "Deploying to Cloudflare Pages".
 	"compatibility_date": "2026-08-01",
 	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
 	// Non-secret default: which MOICA environment (uat/prod) this deployment targets.
