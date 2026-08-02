@@ -45,11 +45,21 @@ an empty body. It's built for Cloudflare's Workers runtime via
 [`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare), then deployed to Pages
 in **Advanced Mode**, where a `_worker.js` at the root of the published directory takes
 over all routing. That package has no built-in Pages target, so
-`scripts/prepare-pages-worker.mjs` bridges the two after each OpenNext build by writing
-`.open-next/assets/_worker.js` as a thin re-export of `.open-next/worker.js` — `wrangler
-pages deploy` then bundles that relative import (and everything *it* imports) into one
-self-contained script before upload, the same way `wrangler deploy` bundles a Workers
-`main` entry.
+`scripts/prepare-pages-worker.mjs` bridges the two after each OpenNext build:
+
+1. Writes `.open-next/assets/_worker.js` as a thin re-export of `.open-next/worker.js`
+   — `wrangler pages deploy` then bundles that relative import (and everything *it*
+   imports) into one self-contained script before upload, the same way `wrangler
+   deploy` bundles a Workers `main` entry.
+2. Patches `__ASSETS_RUN_WORKER_FIRST__` from `false` to `true` in the compiled
+   `.open-next/cloudflare/init.js`. Without this, every static file
+   (`_next/static/*`, images, etc.) 404s even though pages/API routes work fine and
+   the files genuinely exist in the deployed output — confirmed by testing. That flag
+   is normally set from wrangler.jsonc's `assets.run_worker_first`, but Pages configs
+   can't declare an `assets` block at all (the binding name `ASSETS` is reserved —
+   Pages always provides one itself), so it's stuck at its `false` default, which
+   assumes a Workers-style platform bypass for static files that Pages Advanced Mode
+   doesn't actually do. Patching the compiled output is the only lever available.
 
 **`wrangler` requires Node.js ≥22** — check with `node -v`; the rest of this project
 (`next dev`/`next build`) works fine on Node 20+.
