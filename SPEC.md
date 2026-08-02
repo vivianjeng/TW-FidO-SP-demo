@@ -57,9 +57,17 @@ call succeeds — treat it as expected/possible, not a bug in this app:
 
 ## 4. Tech stack
 
-- Next.js 14 (App Router) + TypeScript. One project serves both the UI and the
+- Next.js 15.5.21 (App Router) + TypeScript. One project serves both the UI and the
   SP-side "backend" (Next.js Route Handlers acting as the SP's server, per the Spec's
   own architecture where the SP has a Web tier and a Backend tier).
+  Pinned below 16.x deliberately: Next.js 16.2.x's App Router bundling stopped
+  producing the `handler` named export that `@opennextjs/cloudflare` 1.20.2's request
+  pipeline expects, causing every route to 500 with
+  `TypeError: components.ComponentMod.handler is not a function` once deployed to
+  Cloudflare (confirmed against opennextjs-cloudflare's own issue tracker, e.g. #1258 —
+  a known regression with no fixed version at time of writing). Revisit the version pin
+  once that's resolved upstream; `@opennextjs/cloudflare`'s own peerDependencies range
+  (`>=15.5.21 <16 || >=16.2.11`) is what set the floor here.
 - No database. Per-session config lives server-side in memory keyed by a random
   session id stored in an httpOnly cookie (`twfido_session`). Restarting the server
   clears it — acceptable for a demo.
