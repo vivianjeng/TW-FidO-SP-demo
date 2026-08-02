@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TW FidO SP Demo
 
-## Getting Started
+A Service-Provider-side demo/sandbox for Taiwan's 行動自然人憑證 (Mobile Citizen Digital
+Certificate, aka TW FIDO) API. See [`SPEC.md`](./SPEC.md) for the full write-up —
+architecture, every interface implemented, the checksum/ticket crypto, and known
+limitations.
 
-First, run the development server:
+## Quick start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000, then:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Go to **Settings** and enter your MOI-issued `sp_service_id` and AES key (base64,
+   must decode to 32 bytes). Without these, every page will tell you the environment
+   isn't configured yet — there is no mock/fake backend, this app only talks to the
+   real MOICA servers.
+2. Pick a flow from the dashboard (ATH-01 ticket issuance, ATH-03 push, ATH-04 batch
+   signing, LF-01 device status, the WEB-01 redirect, or the standalone APP-API-01
+   deep-link builder) and customize the request fields — TBS/`sign_data`, `sign_type`
+   (PKCS#1/PKCS#7/RAW), encoding, hash algorithm, `op_code`/`op_mode`, etc.
+3. Every response panel shows the exact request sent, the computed `sp_checksum`, the
+   raw response, and whether the returned `idp_checksum` verifies — this is meant to
+   teach the protocol, not just execute it.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+- `npm run dev` — dev server (Turbopack)
+- `npm run build` / `npm run start` — production build/serve
+- `npm run lint` — ESLint
+- `npx tsc --noEmit` — type-check only
+- `npx tsx lib/moica/crypto.selftest.ts` — round-trip self-test for the
+  sp_checksum/idp_checksum/sp_ticket crypto (see SPEC.md §11 for why this exists
+  instead of matching the source spec's worked hex examples byte-for-byte)
 
-To learn more about Next.js, take a look at the following resources:
+## Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Config (environment, `sp_service_id`, AES key) is stored server-side in memory per
+  browser session — never sent to client-side JS, cleared on server restart. This is a
+  deliberate demo-scope limitation, see SPEC.md §10.
+- The UAT host (`fidoapi-test.moi.gov.tw`) was reachable from this project's dev
+  environment during development despite being documented as Taiwan-only in the source
+  spec; don't assume that holds for every deployment (see SPEC.md §3).
+- `SP-API-WEB-01` (the `/redirect` page) needs a publicly reachable `sp_callback_url`
+  for MOICA to POST results back to — set one on Settings, or use this app's own
+  `/api/callback?sid=...` if this deployment itself is publicly reachable.
