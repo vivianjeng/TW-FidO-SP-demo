@@ -12,13 +12,13 @@
 	// instead: Workers & Pages → this project → Settings → Builds → Build command =
 	// `npm run pages:build`. See README.md "Deploying to Cloudflare Pages".
 	"compatibility_date": "2026-08-01",
-	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"compatibility_flags": ["nodejs_compat"],
 	// Non-secret default: which MOICA environment (uat/prod) this deployment targets.
 	// FIDO_SP_SERVICE_ID and FIDO_AES_KEY are credentials — do NOT put them here, this
 	// file is committed to git. Set them as Pages project secrets instead:
 	//   npx wrangler pages secret put FIDO_SP_SERVICE_ID --project-name tw-fido-sp-demo
 	//   npx wrangler pages secret put FIDO_AES_KEY --project-name tw-fido-sp-demo
 	"vars": {
-		"FIDO_ENVIRONMENT": "uat"
+		"FIDO_ENVIRONMENT": "prod"
 	}
 }
