@@ -36,6 +36,48 @@ Open http://localhost:3000, then:
   sp_checksum/idp_checksum/sp_ticket crypto (see SPEC.md §11 for why this exists
   instead of matching the source spec's worked hex examples byte-for-byte)
 
+## Deploying to Cloudflare Pages
+
+This app is a full-stack Next.js app (Route Handlers, `cookies()`, Node's `crypto` for
+the AES-GCM checksum work) — it is **not** a static export, so classic Cloudflare
+Pages routing (which just serves files by path) can't run it: every request 404s with
+an empty body. It's built for Cloudflare's Workers runtime via
+[`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare), then deployed to Pages
+in **Advanced Mode**, where a `_worker.js` at the root of the published directory takes
+over all routing. That package has no built-in Pages target, so
+`scripts/prepare-pages-worker.mjs` bridges the two after each OpenNext build by writing
+`.open-next/assets/_worker.js` as a thin re-export of `.open-next/worker.js` — `wrangler
+pages deploy` then bundles that relative import (and everything *it* imports) into one
+self-contained script before upload, the same way `wrangler deploy` bundles a Workers
+`main` entry.
+
+**`wrangler` requires Node.js ≥22** — check with `node -v`; the rest of this project
+(`next dev`/`next build`) works fine on Node 20+.
+
+```bash
+npm run pages:preview   # build + run locally under a real Pages/Workers runtime (no Cloudflare account needed)
+npx wrangler login      # one-time, opens a browser to authenticate
+npm run pages:deploy    # build + wrangler pages deploy
+```
+
+`wrangler.jsonc` carries `pages_build_output_dir` (which is what marks it as a Pages,
+not Workers, config) plus `compatibility_date`/`compatibility_flags` (`nodejs_compat` is
+required — without it, every Route Handler using `cookies()`/`crypto` throws) and the
+non-secret `FIDO_ENVIRONMENT` var. Set `sp_service_id`/AES key as **Pages secrets**, not
+plain `vars` (that file is committed to git):
+
+```bash
+npx wrangler pages secret put FIDO_SP_SERVICE_ID --project-name tw-fido-sp-demo
+npx wrangler pages secret put FIDO_AES_KEY --project-name tw-fido-sp-demo
+npm run pages:deploy    # redeploy to pick them up
+```
+
+If you're using Cloudflare's Git-integration dashboard instead of deploying from the
+CLI, set the project's **Build command** to `npm run pages:build` and **Build output
+directory** to `.open-next/assets` (the `_worker.js` step must run as part of that
+build — a plain `next build` alone produces no Pages-compatible output at all, which is
+what causes an all-paths-404 deployment).
+
 ## Notes
 
 - Config (environment, `sp_service_id`, AES key) is stored server-side in memory per

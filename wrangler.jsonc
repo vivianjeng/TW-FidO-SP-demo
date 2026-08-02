@@ -1,0 +1,19 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tw-fido-sp-demo",
+	// Marks this as a Cloudflare Pages config (Advanced Mode): the published directory
+	// contains a `_worker.js` produced from `.open-next/worker.js`, so Pages routes
+	// every request through it instead of doing normal file-based static routing.
+	// See README.md "Deploying to Cloudflare Pages".
+	"pages_build_output_dir": ".open-next/assets",
+	"compatibility_date": "2026-08-01",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	// Non-secret default: which MOICA environment (uat/prod) this deployment targets.
+	// FIDO_SP_SERVICE_ID and FIDO_AES_KEY are credentials — do NOT put them here, this
+	// file is committed to git. Set them as Pages project secrets instead:
+	//   npx wrangler pages secret put FIDO_SP_SERVICE_ID --project-name tw-fido-sp-demo
+	//   npx wrangler pages secret put FIDO_AES_KEY --project-name tw-fido-sp-demo
+	"vars": {
+		"FIDO_ENVIRONMENT": "uat"
+	}
+}

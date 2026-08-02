@@ -1,0 +1,7 @@
+# Copy to .dev.vars for `npm run pages:preview` (local Pages/Workers runtime) — the
+# Workers-mode equivalent of .env.local, which only next dev/next build read.
+# See .env.example for what each variable means.
+FIDO_SP_SERVICE_ID=
+FIDO_AES_KEY=
+FIDO_ENVIRONMENT=
+FIDO_SP_CALLBACK_URL=

@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "pages:build": "opennextjs-cloudflare build && node scripts/prepare-pages-worker.mjs",
+    "pages:preview": "npm run pages:build && wrangler pages dev .open-next/assets",
+    "pages:deploy": "npm run pages:build && wrangler pages deploy .open-next/assets --project-name tw-fido-sp-demo"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   },
   "dependencies": {
     "next": "16.2.12",
@@ -17,6 +23,7 @@
     "uuid": "^14.0.1"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
@@ -26,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.118.0"
   }
 }
