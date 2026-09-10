@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
   const idpChecksumPayload = webRedirectIdpChecksumPayload(callback);
   const idpChecksumValid = sessionConfig
-    ? verifyChecksum(idpChecksumPayload, callback.idp_checksum, sessionConfig.aesKeyBase64)
+    ? await verifyChecksum(idpChecksumPayload, callback.idp_checksum, sessionConfig.aesKeyBase64)
     : false;
 
   if (callback.transaction_id) {

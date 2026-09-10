@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   const time_limit: number | undefined = body.time_limit ? Number(body.time_limit) : undefined;
 
   const spChecksumPayload = ath04SpChecksumPayload({ transaction_id, sp_service_id, id_num, op_code, op_mode, hint });
-  const sp_checksum = computeChecksum(spChecksumPayload, config.aesKeyBase64);
+  const sp_checksum = await computeChecksum(spChecksumPayload, config.aesKeyBase64);
 
   const reqBody: DoBatchSigningRequest = {
     transaction_id,
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       sp_ticket: spTicket,
     });
     result.idpChecksumPayload = idpPayload;
-    result.idpChecksumValid = verifyChecksum(idpPayload, idpChecksum, config.aesKeyBase64);
+    result.idpChecksumValid = await verifyChecksum(idpPayload, idpChecksum, config.aesKeyBase64);
     try {
       result.decodedSpTicket = decodeSpTicket(spTicket);
     } catch {

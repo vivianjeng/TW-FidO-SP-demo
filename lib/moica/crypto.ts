@@ -6,7 +6,7 @@
 // byte-for-byte (page-break text-extraction artifacts) and how this module is instead
 // verified via an encrypt/decrypt round trip (lib/moica/crypto.test.ts).
 
-import { createCipheriv, createDecipheriv, createHash, randomUUID, timingSafeEqual } from "crypto";
+import { createHash, randomUUID, timingSafeEqual } from "crypto";
 import type { DecodedSpTicket } from "./types";
 
 const GCM_IV_LENGTH = 12; // bytes
@@ -29,7 +29,15 @@ export function sha256Hex(input: string): string {
 
 export class AesKeyError extends Error {}
 
-function decodeAesKey(aesKeyBase64: string): Buffer {
+// Buffer's underlying ArrayBufferLike type includes SharedArrayBuffer, which
+// crypto.subtle's BufferSource types reject — copy into a plain, non-shared Uint8Array.
+function toU8(bytes: Uint8Array): Uint8Array<ArrayBuffer> {
+  const out = new Uint8Array(bytes.byteLength);
+  out.set(bytes);
+  return out;
+}
+
+function decodeAesKeyBytes(aesKeyBase64: string): Uint8Array<ArrayBuffer> {
   const key = Buffer.from(aesKeyBase64, "base64");
   if (key.length !== AES_KEY_LENGTH) {
     throw new AesKeyError(
@@ -37,23 +45,30 @@ function decodeAesKey(aesKeyBase64: string): Buffer {
         `Check the AES key configured on the Settings page.`
     );
   }
-  return key;
+  return toU8(key);
 }
 
 /**
  * Computes sp_checksum / idp_checksum: AES-256-GCM encrypt the *ASCII hex string* of
  * SHA-256(payload) under a fixed all-zero 12-byte IV, then hex(iv || ciphertext || tag).
+ *
+ * Uses the Web Crypto API (crypto.subtle) rather than Node's createCipheriv: Cloudflare
+ * Workers' Node compat layer doesn't implement createCipheriv/createDecipheriv ("[unenv]
+ * crypto.createCipheriv is not implemented yet" — confirmed in production logs), while
+ * crypto.subtle is natively supported by both Node and Workers, so this runs identically
+ * in local dev and on Cloudflare Pages.
  */
-export function computeChecksum(payload: string, aesKeyBase64: string): string {
-  const key = decodeAesKey(aesKeyBase64);
-  const iv = Buffer.alloc(GCM_IV_LENGTH, 0);
-  const plaintext = Buffer.from(sha256Hex(payload), "utf8");
+export async function computeChecksum(payload: string, aesKeyBase64: string): Promise<string> {
+  const keyBytes = decodeAesKeyBytes(aesKeyBase64);
+  const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt"]);
+  const iv = new Uint8Array(GCM_IV_LENGTH);
+  const plaintext = toU8(Buffer.from(sha256Hex(payload), "utf8"));
 
-  const cipher = createCipheriv("aes-256-gcm", key, iv, { authTagLength: GCM_TAG_LENGTH });
-  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
-  const tag = cipher.getAuthTag();
+  // subtle.encrypt returns ciphertext with the auth tag appended, so this is already
+  // ciphertext || tag — just prepend the iv to match the wire format.
+  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv, tagLength: GCM_TAG_LENGTH * 8 }, key, plaintext);
 
-  return Buffer.concat([iv, ciphertext, tag]).toString("hex");
+  return Buffer.concat([Buffer.from(iv), Buffer.from(encrypted)]).toString("hex");
 }
 
 /**
@@ -61,19 +76,19 @@ export function computeChecksum(payload: string, aesKeyBase64: string): string {
  * expected payload string. Returns false (never throws) on any malformed input, bad key,
  * or authentication-tag mismatch.
  */
-export function verifyChecksum(payload: string, checksumHex: string, aesKeyBase64: string): boolean {
+export async function verifyChecksum(payload: string, checksumHex: string, aesKeyBase64: string): Promise<boolean> {
   try {
-    const key = decodeAesKey(aesKeyBase64);
+    const keyBytes = decodeAesKeyBytes(aesKeyBase64);
     const combined = Buffer.from(checksumHex, "hex");
     if (combined.length <= GCM_IV_LENGTH + GCM_TAG_LENGTH) return false;
 
-    const iv = combined.subarray(0, GCM_IV_LENGTH);
-    const tag = combined.subarray(combined.length - GCM_TAG_LENGTH);
-    const ciphertext = combined.subarray(GCM_IV_LENGTH, combined.length - GCM_TAG_LENGTH);
+    const iv = toU8(combined.subarray(0, GCM_IV_LENGTH));
+    const ciphertextAndTag = toU8(combined.subarray(GCM_IV_LENGTH));
 
-    const decipher = createDecipheriv("aes-256-gcm", key, iv, { authTagLength: GCM_TAG_LENGTH });
-    decipher.setAuthTag(tag);
-    const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString("utf8");
+    const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["decrypt"]);
+    // Throws (caught below) if the auth tag doesn't verify.
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv, tagLength: GCM_TAG_LENGTH * 8 }, key, ciphertextAndTag);
+    const plaintext = Buffer.from(decrypted).toString("utf8");
 
     const expected = sha256Hex(payload);
     const a = Buffer.from(plaintext, "utf8");

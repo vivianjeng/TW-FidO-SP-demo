@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     hint,
     sign_data: op_code === "SIGN" ? sign_data : undefined,
   });
-  const sp_checksum = computeChecksum(spChecksumPayload, config.aesKeyBase64);
+  const sp_checksum = await computeChecksum(spChecksumPayload, config.aesKeyBase64);
 
   const fields: WebRedirectFields = {
     transaction_id,

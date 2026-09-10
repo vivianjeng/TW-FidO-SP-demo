@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
   const sp_service_id: string = body.sp_service_id_override?.trim() || config.spServiceId;
 
   const spChecksumPayload = ath02SpChecksumPayload({ transaction_id, sp_service_id, sp_ticket_id });
-  const sp_checksum = computeChecksum(spChecksumPayload, config.aesKeyBase64);
+  const sp_checksum = await computeChecksum(spChecksumPayload, config.aesKeyBase64);
 
   const reqBody: GetAthOrSignResultRequest = { transaction_id, sp_service_id, sp_checksum, sp_ticket_id };
 
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       signed_response: r.signed_response,
     });
     result.idpChecksumPayload = idpPayload;
-    result.idpChecksumValid = verifyChecksum(idpPayload, r.idp_checksum, config.aesKeyBase64);
+    result.idpChecksumValid = await verifyChecksum(idpPayload, r.idp_checksum, config.aesKeyBase64);
   }
 
   return NextResponse.json(result);

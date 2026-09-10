@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     hint,
     sign_data: sign_info?.sign_data,
   });
-  const sp_checksum = computeChecksum(spChecksumPayload, config.aesKeyBase64);
+  const sp_checksum = await computeChecksum(spChecksumPayload, config.aesKeyBase64);
 
   const reqBody: GetSpTicketRequest = {
     transaction_id,
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       sp_ticket: spTicket,
     });
     result.idpChecksumPayload = idpPayload;
-    result.idpChecksumValid = verifyChecksum(idpPayload, idpChecksum, config.aesKeyBase64);
+    result.idpChecksumValid = await verifyChecksum(idpPayload, idpChecksum, config.aesKeyBase64);
     try {
       result.decodedSpTicket = decodeSpTicket(spTicket);
     } catch {

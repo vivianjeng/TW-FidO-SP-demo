@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   const id_num: string = body.id_num ?? "";
 
   const spChecksumPayload = lf01SpChecksumPayload({ transaction_id, sp_service_id, id_num });
-  const sp_checksum = computeChecksum(spChecksumPayload, config.aesKeyBase64);
+  const sp_checksum = await computeChecksum(spChecksumPayload, config.aesKeyBase64);
 
   const reqBody: CheckDeviceStatusRequest = { transaction_id, sp_service_id, sp_checksum, id_num };
 
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       is_mcert_sign: r.is_mcert_sign,
     });
     result.idpChecksumPayload = idpPayload;
-    result.idpChecksumValid = verifyChecksum(idpPayload, r.idp_checksum, config.aesKeyBase64);
+    result.idpChecksumValid = await verifyChecksum(idpPayload, r.idp_checksum, config.aesKeyBase64);
   }
 
   return NextResponse.json(result);
