@@ -4,6 +4,7 @@ import { useState } from "react";
 import { postJson } from "@/lib/apiClient";
 import { buttonClass, Card, ErrorBanner, Field, inputClass, JsonBlock, selectClass } from "@/components/ui";
 import { SignInfoFields } from "@/components/SignInfoFields";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import type { OpCode, SignInfo, WebRedirectFields } from "@/lib/moica/types";
 
 interface TokenResponse {
@@ -13,6 +14,7 @@ interface TokenResponse {
 }
 
 export default function RedirectPage() {
+  const t = useT();
   const [opCode, setOpCode] = useState<OpCode>("SIGN");
   const [hint, setHint] = useState("簽章提示訊息");
   const [timeLimit, setTimeLimit] = useState(60);
@@ -55,17 +57,13 @@ export default function RedirectPage() {
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-semibold">SP-API-WEB-01 · 網頁轉導模式介面</h1>
-        <p className="text-sm opacity-70 mt-1">
-          fidoRedirect/web — this SP computes transaction_id + sp_checksum locally, then the browser POSTs straight
-          to {"{fidoweb}"}, exactly like the Spec&apos;s own HTML samples. Requires an SP Callback URL configured on
-          Settings.
-        </p>
+        <h1 className="text-2xl font-semibold">{t("redirect.title")}</h1>
+        <p className="text-sm opacity-70 mt-1">{t("redirect.subtitle", { fidoweb: "{fidoweb}" })}</p>
       </div>
 
       <ErrorBanner message={error} />
 
-      <Card title="Request fields">
+      <Card title={t("redirect.requestFieldsCard")}>
         <Field label="op_code">
           <select className={selectClass} value={opCode} onChange={(e) => setOpCode(e.target.value as OpCode)}>
             <option value="SIGN">SIGN</option>
@@ -87,16 +85,16 @@ export default function RedirectPage() {
               onChange={(e) => setTimeLimit(Number(e.target.value))}
             />
           </Field>
-          <Field label="transaction_id" hint="Leave blank to auto-generate a UUIDv4">
+          <Field label="transaction_id" hint={t("common.leaveBlankUuid")}>
             <input
               className={inputClass}
               value={transactionId}
               onChange={(e) => setTransactionId(e.target.value)}
-              placeholder="auto"
+              placeholder={t("common.auto")}
             />
           </Field>
         </div>
-        <Field label="sp_service_id override (optional)">
+        <Field label={`sp_service_id override (${t("common.optional")})`}>
           <input
             className={inputClass}
             value={spServiceIdOverride}
@@ -107,24 +105,21 @@ export default function RedirectPage() {
         {opCode === "SIGN" && <SignInfoFields value={signInfo} onChange={setSignInfo} />}
 
         <button type="button" className={buttonClass} onClick={compute} disabled={loading}>
-          {loading ? "Computing…" : "Compute sp_checksum"}
+          {loading ? t("redirect.computing") : t("redirect.compute")}
         </button>
       </Card>
 
       {token && (
-        <Card title="Computed — ready to redirect">
-          <JsonBlock label="sp_checksum payload string" value={token.spChecksumPayload} />
-          <JsonBlock label="form fields that will be POSTed" value={token.fields} />
-          <p className="text-xs opacity-60">
-            Submitting navigates this tab away to {token.actionUrl} — the MOICA-hosted redirect UI, outside this
-            app.
-          </p>
+        <Card title={t("redirect.computedCard")}>
+          <JsonBlock label={t("redirect.checksumPayloadLabel")} value={token.spChecksumPayload} />
+          <JsonBlock label={t("redirect.formFieldsLabel")} value={token.fields} />
+          <p className="text-xs opacity-60">{t("redirect.submitNote", { url: token.actionUrl })}</p>
           <form method="POST" action={token.actionUrl}>
             {Object.entries(token.fields).map(([key, value]) => (
               <input key={key} type="hidden" name={key} value={String(value ?? "")} />
             ))}
             <button type="submit" className={buttonClass}>
-              Continue to 行動自然人憑證 →
+              {t("redirect.continueToApp")}
             </button>
           </form>
         </Card>

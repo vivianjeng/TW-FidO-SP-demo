@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getJson, postJson } from "@/lib/apiClient";
 import { buttonClass, Card, ErrorBanner, Field, inputClass, secondaryButtonClass, selectClass, StatusBadge } from "@/components/ui";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import type { Environment, EnvironmentHosts } from "@/lib/moica/types";
 
 const KEEP_EXISTING_KEY = "__KEEP_EXISTING__";
@@ -21,6 +22,7 @@ interface ConfigView {
 }
 
 export default function SettingsPage() {
+  const t = useT();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,43 +82,39 @@ export default function SettingsPage() {
     }
   };
 
-  if (loading) return <p className="text-sm opacity-60">Loading…</p>;
+  if (loading) return <p className="text-sm opacity-60">{t("common.loading")}</p>;
 
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Settings</h1>
-        <p className="text-sm opacity-70 mt-1">
-          These credentials come from MOI&apos;s SP onboarding process. They&apos;re stored server-side for this
-          browser session only (in-memory — a server restart clears them) and are never sent to client-side
-          JavaScript; only computed checksums/tickets are.
-        </p>
+        <h1 className="text-2xl font-semibold">{t("settings.title")}</h1>
+        <p className="text-sm opacity-70 mt-1">{t("settings.subtitle")}</p>
       </div>
 
       <ErrorBanner message={error} />
 
       <Card>
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium">Status:</span>
-          <StatusBadge ok={view?.configured} trueLabel="configured" falseLabel="not configured" />
+          <span className="text-sm font-medium">{t("common.status")}</span>
+          <StatusBadge ok={view?.configured} trueLabel={t("common.configured")} falseLabel={t("common.notConfigured")} />
           {view?.sessionId && (
             <span className="text-xs opacity-60">
-              session: <code>{view.sessionId}</code>
+              {t("common.session")} <code>{view.sessionId}</code>
             </span>
           )}
         </div>
       </Card>
 
-      <Card title="Environment">
-        <Field label="Target environment">
+      <Card title={t("settings.envCard")}>
+        <Field label={t("settings.targetEnv")}>
           <select
             className={selectClass}
             value={environment}
             onChange={(e) => setEnvironment(e.target.value as Environment)}
           >
-            <option value="uat">UAT — fido-test.moi.gov.tw / fidoapi-test.moi.gov.tw</option>
-            <option value="prod">Production — fido.moi.gov.tw / fidoapi.moi.gov.tw</option>
-            <option value="custom">Custom hosts</option>
+            <option value="uat">{t("settings.envUat")}</option>
+            <option value="prod">{t("settings.envProd")}</option>
+            <option value="custom">{t("settings.envCustom")}</option>
           </select>
         </Field>
         {environment === "custom" && (
@@ -141,12 +139,12 @@ export default function SettingsPage() {
         )}
         {environment !== "custom" && view && (
           <p className="text-xs opacity-60">
-            Resolved: <code>{view.hosts.fidoweb}</code> / <code>{view.hosts.fidoapi}</code>
+            {t("settings.resolved")} <code>{view.hosts.fidoweb}</code> / <code>{view.hosts.fidoapi}</code>
           </p>
         )}
       </Card>
 
-      <Card title="SP credentials">
+      <Card title={t("settings.spCredCard")}>
         <Field label="sp_service_id">
           <input
             className={inputClass}
@@ -156,11 +154,11 @@ export default function SettingsPage() {
           />
         </Field>
         <Field
-          label="AES key (base64, must decode to 32 bytes / AES-256)"
+          label={t("settings.aesKeyLabel")}
           hint={
             view?.aesKeyConfigured
-              ? `Currently set (${view.aesKeyMasked}). Leave blank to keep it, or type a new key to replace it.`
-              : "Not set yet."
+              ? t("settings.aesKeyCurrentlySet", { key: view.aesKeyMasked })
+              : t("settings.aesKeyNotSet")
           }
         >
           <input
@@ -172,16 +170,13 @@ export default function SettingsPage() {
               setAesKeyInput(e.target.value);
               setAesKeyTouched(true);
             }}
-            placeholder={view?.aesKeyConfigured ? "•••• leave blank to keep existing key" : "base64 AES-256 key"}
+            placeholder={view?.aesKeyConfigured ? t("settings.aesKeyPlaceholderKeep") : t("settings.aesKeyPlaceholderNew")}
           />
         </Field>
       </Card>
 
-      <Card title="SP Callback URL" subtitle="Only needed for SP-API-WEB-01 (/redirect) — MOICA POSTs the result here.">
-        <Field
-          label="sp_callback_url"
-          hint="Must be a publicly reachable HTTPS URL. Use this app's own /api/callback if this deployment is publicly reachable; otherwise the WEB-01 flow can be inspected up to the redirect but the callback won't arrive."
-        >
+      <Card title={t("settings.callbackCard")} subtitle={t("settings.callbackCardSubtitle")}>
+        <Field label="sp_callback_url" hint={t("settings.callbackHint")}>
           <div className="flex gap-2">
             <input
               className={inputClass}
@@ -194,14 +189,14 @@ export default function SettingsPage() {
               className={secondaryButtonClass}
               onClick={() => setSpCallbackUrl(suggestedCallback())}
             >
-              Use this app&apos;s URL
+              {t("settings.useAppUrl")}
             </button>
           </div>
         </Field>
       </Card>
 
       <button type="button" className={buttonClass} onClick={save} disabled={saving}>
-        {saving ? "Saving…" : "Save settings"}
+        {saving ? t("settings.saving") : t("settings.save")}
       </button>
     </div>
   );

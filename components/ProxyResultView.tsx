@@ -1,10 +1,12 @@
 "use client";
 
 import { Card, JsonBlock, StatusBadge } from "@/components/ui";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import { ERROR_CODE_REFERENCE } from "@/lib/moica/types";
 import type { MoicaErrorEnvelope, ProxyResult } from "@/lib/moica/types";
 
 export function ProxyResultView<T extends MoicaErrorEnvelope>({ result }: { result: ProxyResult<T> }) {
+  const t = useT();
   const errorCode = result.response?.error_code;
   const isBusinessError = errorCode !== undefined && errorCode !== "0";
   const reference = isBusinessError
@@ -13,9 +15,9 @@ export function ProxyResultView<T extends MoicaErrorEnvelope>({ result }: { resu
 
   return (
     <div className="space-y-4">
-      <Card title="Network">
+      <Card title={t("proxyResult.networkCard")}>
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <StatusBadge ok={result.network.ok} trueLabel="connected" falseLabel="failed" />
+          <StatusBadge ok={result.network.ok} trueLabel={t("proxyResult.connected")} falseLabel={t("proxyResult.connectionFailed")} />
           <span className="opacity-70">
             {result.request.url}
             {result.network.status !== undefined && ` → HTTP ${result.network.status}`}
@@ -24,25 +26,28 @@ export function ProxyResultView<T extends MoicaErrorEnvelope>({ result }: { resu
         </div>
         {result.network.error && (
           <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-            {result.network.error} — expected outside Taiwan / without IP allow-listing per Spec §貳.三; see
-            SPEC.md §3.
+            {t("proxyResult.networkErrorNote", { error: result.network.error })}
           </p>
         )}
       </Card>
 
-      <Card title="sp_checksum (SP → IdP)">
-        <JsonBlock label="payload string that was hashed" value={result.spChecksumPayload} />
-        <JsonBlock label="sp_checksum (hex)" value={result.spChecksum} />
+      <Card title={t("proxyResult.spChecksumCard")}>
+        <JsonBlock label={t("proxyResult.payloadHashedLabel")} value={result.spChecksumPayload} />
+        <JsonBlock label={t("proxyResult.spChecksumHexLabel")} value={result.spChecksum} />
       </Card>
 
-      <Card title="Request body sent">
+      <Card title={t("proxyResult.requestBodyCard")}>
         <JsonBlock value={result.request.body} />
       </Card>
 
       {result.response && (
-        <Card title="Response body">
+        <Card title={t("proxyResult.responseBodyCard")}>
           <div className="flex items-center gap-2 text-sm mb-2">
-            <StatusBadge ok={!isBusinessError} trueLabel="error_code = 0" falseLabel={`error_code = ${errorCode}`} />
+            <StatusBadge
+              ok={!isBusinessError}
+              trueLabel={t("proxyResult.errorCodeZero")}
+              falseLabel={t("proxyResult.errorCodeNonZero", { code: errorCode ?? "" })}
+            />
           </div>
           {reference && (
             <p className="text-xs text-amber-700 dark:text-amber-400 mb-2">
@@ -54,20 +59,20 @@ export function ProxyResultView<T extends MoicaErrorEnvelope>({ result }: { resu
       )}
 
       {result.idpChecksumValid !== undefined && (
-        <Card title="idp_checksum (IdP → SP) verification">
-          <StatusBadge ok={result.idpChecksumValid} trueLabel="verified" falseLabel="verification failed" />
+        <Card title={t("proxyResult.idpChecksumCard")}>
+          <StatusBadge ok={result.idpChecksumValid} trueLabel={t("proxyResult.idpVerified")} falseLabel={t("proxyResult.idpVerificationFailed")} />
           {result.idpChecksumPayload && (
-            <JsonBlock label="payload string that should hash to idp_checksum" value={result.idpChecksumPayload} />
+            <JsonBlock label={t("proxyResult.idpPayloadLabel")} value={result.idpChecksumPayload} />
           )}
         </Card>
       )}
 
       {result.decodedSpTicket && (
-        <Card title="Decoded sp_ticket">
+        <Card title={t("proxyResult.decodedTicketCard")}>
           <StatusBadge
             ok={result.decodedSpTicket.digestValid}
-            trueLabel="digest matches"
-            falseLabel="digest mismatch"
+            trueLabel={t("proxyResult.digestMatches")}
+            falseLabel={t("proxyResult.digestMismatch")}
           />
           <JsonBlock value={result.decodedSpTicket.payload} />
         </Card>

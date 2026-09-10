@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { postJson } from "@/lib/apiClient";
 import { buttonClass, Card, ErrorBanner, Field, inputClass, secondaryButtonClass } from "@/components/ui";
 import { ProxyResultView } from "@/components/ProxyResultView";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import type { GetAthOrSignResultResponse, ProxyResult } from "@/lib/moica/types";
 
 const POLL_INTERVAL_MS = 4000; // Spec: "建議每次查詢認證/簽章結果間隔時間4 秒"
 
 export default function ResultPage() {
+  const t = useT();
   const [spTicket, setSpTicket] = useState("");
   const [transactionId, setTransactionId] = useState("");
   const [spTicketId, setSpTicketId] = useState("");
@@ -64,17 +66,14 @@ export default function ResultPage() {
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-semibold">SP-API-ATH-02 · 查詢認證/簽章結果</h1>
-        <p className="text-sm opacity-70 mt-1">
-          getAthOrSignResult — poll a ticket for its auth/sign outcome. Spec recommends a ≥4s interval between
-          queries, enforced here when you use &quot;Start polling&quot;.
-        </p>
+        <h1 className="text-2xl font-semibold">{t("result.title")}</h1>
+        <p className="text-sm opacity-70 mt-1">{t("result.subtitle")}</p>
       </div>
 
       <ErrorBanner message={error} />
 
-      <Card title="Ticket to query">
-        <Field label="sp_ticket" hint="Paste the full sp_ticket returned by ATH-01/03/04 — transaction_id and sp_ticket_id are extracted from it automatically.">
+      <Card title={t("result.ticketCard")}>
+        <Field label="sp_ticket" hint={t("result.spTicketHint")}>
           <textarea
             className={`${inputClass} font-mono min-h-20`}
             value={spTicket}
@@ -82,7 +81,7 @@ export default function ResultPage() {
             placeholder="eyJ0cmFuc2FjdGlvbl9pZCI6...  .  ...digest"
           />
         </Field>
-        <p className="text-xs opacity-60">— or, if you already know both values —</p>
+        <p className="text-xs opacity-60">{t("result.orIfKnown")}</p>
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="transaction_id">
             <input className={inputClass} value={transactionId} onChange={(e) => setTransactionId(e.target.value)} disabled={!!spTicket} />
@@ -91,24 +90,28 @@ export default function ResultPage() {
             <input className={inputClass} value={spTicketId} onChange={(e) => setSpTicketId(e.target.value)} disabled={!!spTicket} />
           </Field>
         </div>
-        <Field label="sp_service_id override (optional)">
+        <Field label={`sp_service_id override (${t("common.optional")})`}>
           <input className={inputClass} value={spServiceIdOverride} onChange={(e) => setSpServiceIdOverride(e.target.value)} />
         </Field>
 
         <div className="flex flex-wrap items-center gap-3">
           <button type="button" className={buttonClass} onClick={queryOnce} disabled={loading || polling}>
-            {loading && !polling ? "Querying…" : "Query once"}
+            {loading && !polling ? t("result.querying") : t("result.queryOnce")}
           </button>
           {!polling ? (
             <button type="button" className={secondaryButtonClass} onClick={startPolling}>
-              Start polling (every {POLL_INTERVAL_MS / 1000}s)
+              {t("result.startPolling", { seconds: POLL_INTERVAL_MS / 1000 })}
             </button>
           ) : (
             <button type="button" className={secondaryButtonClass} onClick={stopPolling}>
-              Stop polling
+              {t("result.stopPolling")}
             </button>
           )}
-          {pollCount > 0 && <span className="text-xs opacity-60">{pollCount} quer{pollCount === 1 ? "y" : "ies"} sent</span>}
+          {pollCount > 0 && (
+            <span className="text-xs opacity-60">
+              {t(pollCount === 1 ? "result.queriesSentOne" : "result.queriesSentMany", { count: pollCount })}
+            </span>
+          )}
         </div>
       </Card>
 
@@ -116,7 +119,7 @@ export default function ResultPage() {
         <>
           <ProxyResultView result={result} />
           {signedSet && (
-            <Card title="signed_response_set (batch)">
+            <Card title={t("result.signedSetCard")}>
               <ol className="list-decimal list-inside space-y-1 text-xs font-mono break-all">
                 {signedSet.map((s, i) => (
                   <li key={i}>{s}</li>

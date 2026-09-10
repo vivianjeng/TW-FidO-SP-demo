@@ -15,11 +15,13 @@ import {
 } from "@/components/ui";
 import { ProxyResultView } from "@/components/ProxyResultView";
 import { QrCode } from "@/components/QrCode";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import type { DoBatchSigningResponse, HashAlgorithm, OpMode, ProxyResult, SignType, TbsEncoding } from "@/lib/moica/types";
 
 const MAX_DOCS = 20;
 
 export default function BatchPage() {
+  const t = useT();
   const [opMode, setOpMode] = useState<Extract<OpMode, "PUSH" | "APP2APP" | "MWEB2APP">>("PUSH");
   const [idNum, setIdNum] = useState("A123456789");
   const [hint, setHint] = useState("連續簽署待簽署資料");
@@ -71,13 +73,13 @@ export default function BatchPage() {
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-semibold">SP-API-ATH-04 · 請求連續簽章 SP ticket</h1>
-        <p className="text-sm opacity-70 mt-1">doBatchSigning (BATSIGN) — up to {MAX_DOCS} documents in one ticket.</p>
+        <h1 className="text-2xl font-semibold">{t("batch.title")}</h1>
+        <p className="text-sm opacity-70 mt-1">{t("batch.subtitle", { max: MAX_DOCS })}</p>
       </div>
 
       <ErrorBanner message={error} />
 
-      <Card title="Operation mode">
+      <Card title={t("batch.opModeCard")}>
         <SegmentedControl
           value={opMode}
           onChange={setOpMode}
@@ -89,12 +91,12 @@ export default function BatchPage() {
         />
       </Card>
 
-      <Card title="Request fields">
+      <Card title={t("batch.requestFieldsCard")}>
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="id_num">
             <input className={inputClass} value={idNum} onChange={(e) => setIdNum(e.target.value)} />
           </Field>
-          <Field label="device_user_def_desc (optional)">
+          <Field label={`device_user_def_desc (${t("common.optional")})`}>
             <input className={inputClass} value={deviceDesc} onChange={(e) => setDeviceDesc(e.target.value)} />
           </Field>
         </div>
@@ -112,16 +114,16 @@ export default function BatchPage() {
               onChange={(e) => setTimeLimit(Number(e.target.value))}
             />
           </Field>
-          <Field label="transaction_id" hint="Leave blank to auto-generate a UUIDv4">
+          <Field label="transaction_id" hint={t("common.leaveBlankUuid")}>
             <input
               className={inputClass}
               value={transactionId}
               onChange={(e) => setTransactionId(e.target.value)}
-              placeholder="auto"
+              placeholder={t("common.auto")}
             />
           </Field>
         </div>
-        <Field label="sp_service_id override (optional)">
+        <Field label={`sp_service_id override (${t("common.optional")})`}>
           <input
             className={inputClass}
             value={spServiceIdOverride}
@@ -130,7 +132,7 @@ export default function BatchPage() {
         </Field>
       </Card>
 
-      <Card title="sign_info (applies to the whole sign_data_set)">
+      <Card title={t("batch.signInfoCard")}>
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="sign_type">
             <select className={selectClass} value={signType} onChange={(e) => setSignType(e.target.value as SignType)}>
@@ -139,7 +141,7 @@ export default function BatchPage() {
               <option value="PKCS#7">PKCS#7</option>
             </select>
           </Field>
-          <Field label="tbs_encoding" hint="Batch only supports base64">
+          <Field label="tbs_encoding" hint={t("batch.tbsEncodingHint")}>
             <select
               className={selectClass}
               value={tbsEncoding}
@@ -181,7 +183,7 @@ export default function BatchPage() {
                 onClick={() => setDocs((prev) => prev.filter((_, idx) => idx !== i))}
                 disabled={docs.length <= 1}
               >
-                Remove
+                {t("batch.remove")}
               </button>
             </div>
           ))}
@@ -191,12 +193,12 @@ export default function BatchPage() {
             onClick={() => setDocs((prev) => [...prev, ""])}
             disabled={docs.length >= MAX_DOCS}
           >
-            + Add document
+            {t("batch.addDocument")}
           </button>
         </div>
 
         <button type="button" className={buttonClass} onClick={submit} disabled={loading}>
-          {loading ? "Requesting…" : "Request batch sp_ticket"}
+          {loading ? t("batch.requesting") : t("batch.submit")}
         </button>
       </Card>
 
@@ -204,7 +206,7 @@ export default function BatchPage() {
         <>
           <ProxyResultView result={result} />
           {spTicket && (opMode === "APP2APP" || opMode === "MWEB2APP") && (
-            <Card title="APP-API-01 deep link" subtitle="verifySign — built from this ticket's sp_ticket.">
+            <Card title={t("batch.deepLinkCard")} subtitle={t("batch.deepLinkCardSubtitle")}>
               <div className="grid sm:grid-cols-2 gap-3">
                 <Field label="rtn_url">
                   <input className={inputClass} value={rtnUrl} onChange={(e) => setRtnUrl(e.target.value)} />
@@ -220,7 +222,7 @@ export default function BatchPage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-4">
                     <a href={appLink} className={secondaryButtonClass}>
-                      Open 行動自然人憑證 App
+                      {t("batch.openApp")}
                     </a>
                     <QrCode value={appLink} size={160} />
                   </div>

@@ -2,27 +2,32 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLocale, useT } from "@/lib/i18n/LocaleProvider";
+import type { TKey } from "@/lib/i18n/translations";
 
-const links = [
-  { href: "/", label: "Dashboard" },
-  { href: "/settings", label: "Settings" },
-  { href: "/redirect", label: "WEB-01 Redirect" },
-  { href: "/ticket", label: "ATH-01 Ticket" },
-  { href: "/push", label: "ATH-03 Push" },
-  { href: "/batch", label: "ATH-04 Batch" },
-  { href: "/result", label: "ATH-02 Result" },
-  { href: "/device-status", label: "LF-01 Device" },
-  { href: "/app-link", label: "APP-API-01 Link" },
-  { href: "/reference", label: "Reference" },
+const links: Array<{ href: string; labelKey: TKey }> = [
+  { href: "/", labelKey: "nav.dashboard" },
+  { href: "/settings", labelKey: "nav.settings" },
+  { href: "/redirect", labelKey: "nav.webRedirect" },
+  { href: "/ticket", labelKey: "nav.ticket" },
+  { href: "/push", labelKey: "nav.push" },
+  { href: "/batch", labelKey: "nav.batch" },
+  { href: "/result", labelKey: "nav.result" },
+  { href: "/device-status", labelKey: "nav.deviceStatus" },
+  { href: "/app-link", labelKey: "nav.appLink" },
+  { href: "/reference", labelKey: "nav.reference" },
 ];
 
 export function Nav() {
   const pathname = usePathname();
+  const t = useT();
+  const { locale, setLocale } = useLocale();
+
   return (
     <header className="border-b border-black/10 dark:border-white/10 bg-white/70 dark:bg-black/30 backdrop-blur sticky top-0 z-10">
       <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
         <Link href="/" className="font-semibold tracking-tight whitespace-nowrap">
-          TW FidO SP Demo
+          {t("nav.brand")}
         </Link>
         <nav className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
           {links.map((link) => {
@@ -33,11 +38,18 @@ export function Nav() {
                 href={link.href}
                 className={active ? "font-semibold text-blue-600 dark:text-blue-400" : "opacity-70 hover:opacity-100"}
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             );
           })}
         </nav>
+        <button
+          type="button"
+          onClick={() => setLocale(locale === "en" ? "zh" : "en")}
+          className="ml-auto rounded-md border border-black/15 dark:border-white/20 px-2.5 py-1 text-xs font-medium hover:bg-black/[.03] dark:hover:bg-white/[.06] transition-colors"
+        >
+          {t("nav.localeToggleLabel")}
+        </button>
       </div>
     </header>
   );

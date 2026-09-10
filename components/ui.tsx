@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useT } from "@/lib/i18n/LocaleProvider";
 
 export const inputClass =
   "w-full rounded-md border border-black/15 dark:border-white/20 bg-white dark:bg-white/[.04] px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50";
@@ -67,6 +68,7 @@ export function StatusBadge({
 
 export function JsonBlock({ value, label }: { value: unknown; label?: string }) {
   const [copied, setCopied] = useState(false);
+  const t = useT();
   const text = typeof value === "string" ? value : JSON.stringify(value, null, 2);
   return (
     <div className="rounded-md border border-black/10 dark:border-white/10 bg-black/[.03] dark:bg-black/20 overflow-hidden">
@@ -82,7 +84,7 @@ export function JsonBlock({ value, label }: { value: unknown; label?: string }) 
               setTimeout(() => setCopied(false), 1200);
             }}
           >
-            {copied ? "copied" : "copy"}
+            {copied ? t("ui.copied") : t("ui.copy")}
           </button>
         </div>
       )}

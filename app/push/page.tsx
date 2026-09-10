@@ -5,9 +5,11 @@ import { postJson } from "@/lib/apiClient";
 import { buttonClass, Card, ErrorBanner, Field, inputClass, selectClass } from "@/components/ui";
 import { SignInfoFields } from "@/components/SignInfoFields";
 import { ProxyResultView } from "@/components/ProxyResultView";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import type { OpCode, ProxyResult, RequestAthOrSignPushResponse, SignInfo } from "@/lib/moica/types";
 
 export default function PushPage() {
+  const t = useT();
   const [opCode, setOpCode] = useState<OpCode>("ATH");
   const [idNum, setIdNum] = useState("A123456789");
   const [hint, setHint] = useState("XX需用機關認證");
@@ -46,15 +48,13 @@ export default function PushPage() {
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-semibold">SP-API-ATH-03 · 請求認證/簽章推播</h1>
-        <p className="text-sm opacity-70 mt-1">
-          requestAthOrSignPush — pushes an ATH/SIGN/NFCSIGN request straight to the user&apos;s bound device(s).
-        </p>
+        <h1 className="text-2xl font-semibold">{t("push.title")}</h1>
+        <p className="text-sm opacity-70 mt-1">{t("push.subtitle")}</p>
       </div>
 
       <ErrorBanner message={error} />
 
-      <Card title="Request fields">
+      <Card title={t("push.requestFieldsCard")}>
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="id_num">
             <input className={inputClass} value={idNum} onChange={(e) => setIdNum(e.target.value)} />
@@ -71,8 +71,8 @@ export default function PushPage() {
           <input className={inputClass} value={hint} onChange={(e) => setHint(e.target.value)} />
         </Field>
         <Field
-          label="device_user_def_desc (optional)"
-          hint="Leave blank to push to every device the user has bound"
+          label={`device_user_def_desc (${t("common.optional")})`}
+          hint={t("push.deviceDescHint")}
         >
           <input className={inputClass} value={deviceDesc} onChange={(e) => setDeviceDesc(e.target.value)} />
         </Field>
@@ -87,16 +87,16 @@ export default function PushPage() {
               onChange={(e) => setTimeLimit(Number(e.target.value))}
             />
           </Field>
-          <Field label="transaction_id" hint="Leave blank to auto-generate a UUIDv4">
+          <Field label="transaction_id" hint={t("common.leaveBlankUuid")}>
             <input
               className={inputClass}
               value={transactionId}
               onChange={(e) => setTransactionId(e.target.value)}
-              placeholder="auto"
+              placeholder={t("common.auto")}
             />
           </Field>
         </div>
-        <Field label="sp_service_id override (optional)">
+        <Field label={`sp_service_id override (${t("common.optional")})`}>
           <input
             className={inputClass}
             value={spServiceIdOverride}
@@ -107,7 +107,7 @@ export default function PushPage() {
         {opCode === "SIGN" && <SignInfoFields value={signInfo} onChange={setSignInfo} />}
 
         <button type="button" className={buttonClass} onClick={submit} disabled={loading}>
-          {loading ? "Requesting…" : "Send push"}
+          {loading ? t("push.requesting") : t("push.submit")}
         </button>
       </Card>
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Field, inputClass, selectClass, SegmentedControl } from "@/components/ui";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import type { HashAlgorithm, SignInfo, SignType, TbsEncoding } from "@/lib/moica/types";
 
 function utf8ToBase64(text: string): string {
@@ -19,6 +20,7 @@ function utf8ToBase64(text: string): string {
  * when sign_type=RAW since the Spec requires tbs_encoding=base64 in that case.
  */
 export function SignInfoFields({ value, onChange }: { value: SignInfo; onChange: (next: SignInfo) => void }) {
+  const t = useT();
   const [inputMode, setInputMode] = useState<"text" | "base64">("text");
   const [rawText, setRawText] = useState(value.sign_data ?? "DOC_DIGEST_1234567890");
   const [signType, setSignType] = useState<SignType>(value.sign_type ?? "PKCS#7");
@@ -48,13 +50,13 @@ export function SignInfoFields({ value, onChange }: { value: SignInfo; onChange:
       </Field>
 
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">TBS (sign_data)</span>
+        <span className="text-sm font-medium">{t("signInfo.tbsLabel")}</span>
         <SegmentedControl
           value={inputMode}
           onChange={setInputMode}
           options={[
-            { value: "text", label: "Plain text" },
-            { value: "base64", label: "Already base64" },
+            { value: "text", label: t("signInfo.plainText") },
+            { value: "base64", label: t("signInfo.alreadyBase64") },
           ]}
         />
       </div>
@@ -65,8 +67,9 @@ export function SignInfoFields({ value, onChange }: { value: SignInfo; onChange:
         placeholder={inputMode === "text" ? "Good Morning, I am your plaindata." : "RE9DX0RJR0VTVF8xMjM0NTY3ODkw"}
       />
       <p className="text-xs opacity-60">
-        {rawText.length} chars (limit 1024 per Spec) · tbs_encoding=<code>{effective.tbs_encoding}</code>
-        {signType === "RAW" && inputMode === "text" && " · auto-base64-encoded because sign_type=RAW"}
+        {t("signInfo.charsLimit", { count: rawText.length })}
+        <code>{effective.tbs_encoding}</code>
+        {signType === "RAW" && inputMode === "text" && ` ${t("signInfo.autoBase64Note")}`}
       </p>
 
       {signType !== "RAW" && (

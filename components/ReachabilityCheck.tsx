@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { getJson } from "@/lib/apiClient";
 import { secondaryButtonClass, StatusBadge } from "@/components/ui";
+import { useT } from "@/lib/i18n/LocaleProvider";
 
 interface ReachabilityResponse {
   checked: boolean;
@@ -14,6 +15,7 @@ interface ReachabilityResponse {
 }
 
 export function ReachabilityCheck() {
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ReachabilityResponse | null>(null);
 
@@ -32,11 +34,11 @@ export function ReachabilityCheck() {
   return (
     <div className="space-y-2">
       <button type="button" className={secondaryButtonClass} onClick={run} disabled={loading}>
-        {loading ? "Checking…" : "Check {fidoapi} reachability"}
+        {loading ? t("reachability.checking") : t("reachability.checkButton")}
       </button>
       {result?.checked && (
         <div className="text-sm flex flex-wrap items-center gap-2">
-          <StatusBadge ok={result.reachable} trueLabel="reachable" falseLabel="unreachable" />
+          <StatusBadge ok={result.reachable} trueLabel={t("reachability.reachable")} falseLabel={t("reachability.unreachable")} />
           <span className="opacity-70 break-all">
             {result.url} {result.status !== undefined && `→ HTTP ${result.status}`} {result.error}
             {result.durationMs !== undefined && ` (${result.durationMs}ms)`}
@@ -44,10 +46,7 @@ export function ReachabilityCheck() {
         </div>
       )}
       {result?.checked && result.reachable === false && (
-        <p className="text-xs opacity-60">
-          Expected in most places: per the Spec, the UAT host is documented as unreachable from outside Taiwan and
-          production is IP-allow-listed to registered agencies (see SPEC.md §3).
-        </p>
+        <p className="text-xs opacity-60">{t("reachability.expectedNote")}</p>
       )}
     </div>
   );
