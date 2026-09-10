@@ -6,6 +6,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { randomUUID } from "crypto";
 import { EMPTY_SESSION_CONFIG, Environment, ENVIRONMENT_HOSTS, EnvironmentHosts, SessionConfig } from "./types";
+import { aesKeyByteLength } from "./crypto";
 
 const SESSION_COOKIE = "twfido_session";
 
@@ -86,5 +87,10 @@ export function resolveHosts(config: SessionConfig): EnvironmentHosts {
 
 export function isConfigComplete(config: SessionConfig): boolean {
   const hosts = resolveHosts(config);
-  return Boolean(config.spServiceId && config.aesKeyBase64 && hosts.fidoweb && hosts.fidoapi);
+  // aesKeyByteLength(...) === 32 also rejects a key sourced from env/Pages secrets
+  // (envDefaultConfig, above) that was never run through /api/config's own length
+  // check — without this, computeChecksum's decodeAesKey throws uncaught downstream.
+  return Boolean(
+    config.spServiceId && aesKeyByteLength(config.aesKeyBase64) === 32 && hosts.fidoweb && hosts.fidoapi
+  );
 }
