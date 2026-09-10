@@ -6,7 +6,14 @@ import { decodeSpTicket } from "@/lib/moica/crypto";
 // decodeSpTicket only needs Node's crypto module (SHA-256), no AES key, so this never
 // touches session config.
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Request body must be valid JSON." }, { status: 400 });
+  }
+
   const spTicket: string = body.sp_ticket ?? "";
   if (!spTicket) {
     return NextResponse.json({ error: "sp_ticket is required" }, { status: 400 });

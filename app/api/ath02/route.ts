@@ -8,7 +8,14 @@ import type { GetAthOrSignResultRequest, GetAthOrSignResultResponse, ProxyResult
 const PATH = "/moise/sp/getAthOrSignResult";
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Request body must be valid JSON." }, { status: 400 });
+  }
+
   const config = await getSessionConfig();
   const hosts = resolveHosts(config);
 

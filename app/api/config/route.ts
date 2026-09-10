@@ -37,7 +37,14 @@ export async function GET() {
 const KEEP_EXISTING_KEY = "__KEEP_EXISTING__";
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Request body must be valid JSON." }, { status: 400 });
+  }
+
   const previous = await getSessionConfig();
 
   const environment: Environment = ["uat", "prod", "custom"].includes(body.environment) ? body.environment : "uat";
