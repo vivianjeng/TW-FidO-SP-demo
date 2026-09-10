@@ -5,6 +5,7 @@ import { postJson } from "@/lib/apiClient";
 import { buttonClass, Card, ErrorBanner, Field, inputClass, JsonBlock, selectClass } from "@/components/ui";
 import { SignInfoFields } from "@/components/SignInfoFields";
 import { useT } from "@/lib/i18n/LocaleProvider";
+import { buildFormCurl } from "@/lib/curl";
 import type { OpCode, SignInfo, WebRedirectFields } from "@/lib/moica/types";
 
 interface TokenResponse {
@@ -114,6 +115,17 @@ export default function RedirectPage() {
           <JsonBlock label={t("redirect.checksumPayloadLabel")} value={token.spChecksumPayload} />
           <JsonBlock label={t("redirect.formFieldsLabel")} value={token.fields} />
           <p className="text-xs opacity-60">{t("redirect.submitNote", { url: token.actionUrl })}</p>
+        </Card>
+      )}
+
+      {token && (
+        <Card title={t("redirect.curlCard")}>
+          <JsonBlock label={t("redirect.curlLabel")} value={buildFormCurl(token.actionUrl, token.fields)} />
+        </Card>
+      )}
+
+      {token && (
+        <Card>
           <form method="POST" action={token.actionUrl}>
             {Object.entries(token.fields).map(([key, value]) => (
               <input key={key} type="hidden" name={key} value={String(value ?? "")} />

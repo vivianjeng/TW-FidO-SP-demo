@@ -2,6 +2,7 @@
 
 import { Card, JsonBlock, StatusBadge } from "@/components/ui";
 import { useT } from "@/lib/i18n/LocaleProvider";
+import { buildJsonCurl } from "@/lib/curl";
 import { ERROR_CODE_REFERENCE } from "@/lib/moica/types";
 import type { MoicaErrorEnvelope, ProxyResult } from "@/lib/moica/types";
 
@@ -38,6 +39,10 @@ export function ProxyResultView<T extends MoicaErrorEnvelope>({ result }: { resu
 
       <Card title={t("proxyResult.requestBodyCard")}>
         <JsonBlock value={result.request.body} />
+      </Card>
+
+      <Card title={t("proxyResult.curlCard")}>
+        <JsonBlock label={t("proxyResult.curlLabel")} value={buildJsonCurl(result.request.url, result.request.body)} />
       </Card>
 
       {result.response && (

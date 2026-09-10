@@ -224,6 +224,8 @@ export const translations = {
   "redirect.computedCard": { en: "Computed — ready to redirect", zh: "計算完成，可開始轉導" },
   "redirect.checksumPayloadLabel": { en: "sp_checksum payload string", zh: "sp_checksum 待雜湊字串" },
   "redirect.formFieldsLabel": { en: "form fields that will be POSTed", zh: "將被 POST 送出的表單欄位" },
+  "redirect.curlCard": { en: "cURL command", zh: "cURL 指令" },
+  "redirect.curlLabel": { en: "reproduce this request from a terminal", zh: "可在終端機重現此請求" },
   "redirect.submitNote": {
     en: "Submitting navigates this tab away to {url} — the MOICA-hosted redirect UI, outside this app.",
     zh: "送出後此分頁將導向 {url} — 該轉導頁面由 MOICA 提供，不屬於本站。",
@@ -314,6 +316,8 @@ export const translations = {
   "proxyResult.payloadHashedLabel": { en: "payload string that was hashed", zh: "被雜湊的原始字串" },
   "proxyResult.spChecksumHexLabel": { en: "sp_checksum (hex)", zh: "sp_checksum（十六進位）" },
   "proxyResult.requestBodyCard": { en: "Request body sent", zh: "送出的請求內容" },
+  "proxyResult.curlCard": { en: "cURL command", zh: "cURL 指令" },
+  "proxyResult.curlLabel": { en: "reproduce this request from a terminal", zh: "可在終端機重現此請求" },
   "proxyResult.responseBodyCard": { en: "Response body", zh: "回應內容" },
   "proxyResult.errorCodeZero": { en: "error_code = 0", zh: "error_code = 0" },
   "proxyResult.errorCodeNonZero": { en: "error_code = {code}", zh: "error_code = {code}" },
