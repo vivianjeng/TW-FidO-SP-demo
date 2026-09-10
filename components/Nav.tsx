@@ -43,13 +43,23 @@ export function Nav() {
             );
           })}
         </nav>
-        <button
-          type="button"
-          onClick={() => setLocale(locale === "en" ? "zh" : "en")}
-          className="ml-auto rounded-md border border-black/15 dark:border-white/20 px-2.5 py-1 text-xs font-medium hover:bg-black/[.03] dark:hover:bg-white/[.06] transition-colors"
-        >
-          {t("nav.localeToggleLabel")}
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          <a
+            href="https://github.com/vivianjeng/TW-FidO-SP-demo"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-md border border-black/15 dark:border-white/20 px-2.5 py-1 text-xs font-medium hover:bg-black/[.03] dark:hover:bg-white/[.06] transition-colors"
+          >
+            GitHub
+          </a>
+          <button
+            type="button"
+            onClick={() => setLocale(locale === "en" ? "zh" : "en")}
+            className="rounded-md border border-black/15 dark:border-white/20 px-2.5 py-1 text-xs font-medium hover:bg-black/[.03] dark:hover:bg-white/[.06] transition-colors"
+          >
+            {t("nav.localeToggleLabel")}
+          </button>
+        </div>
       </div>
     </header>
   );
