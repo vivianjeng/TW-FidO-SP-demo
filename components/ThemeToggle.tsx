@@ -14,7 +14,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={isDark ? t("nav.themeToDark") : t("nav.themeToLight")}
       title={isDark ? t("nav.themeToDark") : t("nav.themeToLight")}
-      className="inline-flex items-center justify-center rounded-md border border-black/15 dark:border-white/20 p-1.5 hover:bg-black/[.03] dark:hover:bg-white/[.06] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
+      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-black/15 dark:border-white/20 hover:bg-black/[.03] dark:hover:bg-white/[.06] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
     >
       {isDark ? (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
