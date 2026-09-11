@@ -85,7 +85,7 @@ export default function SettingsPage() {
   if (loading) return <p className="text-sm opacity-60">{t("common.loading")}</p>;
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-2xl space-y-6 mx-auto">
       <div>
         <h1 className="text-2xl font-semibold">{t("settings.title")}</h1>
         <p className="text-sm opacity-70 mt-1">{t("settings.subtitle")}</p>

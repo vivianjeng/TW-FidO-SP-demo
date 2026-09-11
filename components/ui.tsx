@@ -4,15 +4,15 @@ import { useState, type ReactNode } from "react";
 import { useT } from "@/lib/i18n/LocaleProvider";
 
 export const inputClass =
-  "w-full rounded-md border border-black/15 dark:border-white/20 bg-white dark:bg-white/[.04] px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50";
+  "w-full rounded-md border border-black/15 dark:border-white/20 bg-white dark:bg-white/[.04] px-2.5 py-1.5 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 disabled:opacity-50";
 
 export const selectClass = inputClass;
 
 export const buttonClass =
-  "inline-flex items-center justify-center gap-1.5 rounded-md bg-blue-600 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none transition-colors";
+  "inline-flex items-center justify-center gap-1.5 rounded-md bg-blue-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 active:bg-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950 disabled:opacity-50 disabled:pointer-events-none transition-colors";
 
 export const secondaryButtonClass =
-  "inline-flex items-center justify-center gap-1.5 rounded-md border border-black/15 dark:border-white/20 px-3.5 py-1.5 text-sm font-medium hover:bg-black/[.03] dark:hover:bg-white/[.06] disabled:opacity-50 disabled:pointer-events-none transition-colors";
+  "inline-flex items-center justify-center gap-1.5 rounded-md border border-black/15 dark:border-white/20 px-3.5 py-1.5 text-sm font-medium hover:bg-black/[.03] dark:hover:bg-white/[.06] active:bg-black/[.06] dark:active:bg-white/[.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 disabled:opacity-50 disabled:pointer-events-none transition-colors";
 
 export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
@@ -26,7 +26,7 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
 
 export function Card({ title, subtitle, children }: { title?: string; subtitle?: string; children: ReactNode }) {
   return (
-    <section className="rounded-lg border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/[.03] p-4 space-y-3">
+    <section className="rounded-lg border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/[.03] shadow-sm p-4 space-y-3">
       {title && (
         <div>
           <h2 className="text-sm font-semibold tracking-wide uppercase opacity-70">{title}</h2>
@@ -77,14 +77,14 @@ export function JsonBlock({ value, label }: { value: unknown; label?: string }) 
           <span className="text-xs font-medium opacity-70">{label}</span>
           <button
             type="button"
-            className="text-xs underline opacity-70 hover:opacity-100"
+            className="text-xs opacity-70 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded transition-opacity"
             onClick={() => {
               navigator.clipboard.writeText(text);
               setCopied(true);
               setTimeout(() => setCopied(false), 1200);
             }}
           >
-            {copied ? t("ui.copied") : t("ui.copy")}
+            {copied ? `✓ ${t("ui.copied")}` : t("ui.copy")}
           </button>
         </div>
       )}
@@ -118,7 +118,7 @@ export function SegmentedControl<T extends string>({
           key={opt.value}
           type="button"
           onClick={() => onChange(opt.value)}
-          className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
+          className={`rounded px-3 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 ${
             value === opt.value
               ? "bg-blue-600 text-white"
               : "hover:bg-black/[.05] dark:hover:bg-white/[.08] opacity-80"

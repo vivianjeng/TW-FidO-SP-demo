@@ -46,7 +46,7 @@ export default function PushPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-3xl mx-auto">
       <div>
         <h1 className="text-2xl font-semibold">{t("push.title")}</h1>
         <p className="text-sm opacity-70 mt-1">{t("push.subtitle")}</p>

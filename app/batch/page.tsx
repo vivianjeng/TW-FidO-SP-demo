@@ -71,7 +71,7 @@ export default function BatchPage() {
       : null;
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-3xl mx-auto">
       <div>
         <h1 className="text-2xl font-semibold">{t("batch.title")}</h1>
         <p className="text-sm opacity-70 mt-1">{t("batch.subtitle", { max: MAX_DOCS })}</p>

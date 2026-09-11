@@ -8,7 +8,7 @@ export default function ReferencePage() {
   const t = useT();
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-4xl mx-auto">
       <div>
         <h1 className="text-2xl font-semibold">{t("reference.title")}</h1>
         <p className="text-sm opacity-70 mt-1">{t("reference.subtitle")}</p>

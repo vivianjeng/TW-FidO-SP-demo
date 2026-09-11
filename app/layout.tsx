@@ -4,6 +4,7 @@ import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { LocaleProvider } from "@/lib/i18n/LocaleProvider";
+import { ThemeProvider, themeInitScript } from "@/lib/theme/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,12 +32,17 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-full flex flex-col bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
-        <LocaleProvider>
-          <Nav />
-          <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-6">{children}</main>
-          <Footer />
-        </LocaleProvider>
+        <ThemeProvider>
+          <LocaleProvider>
+            <Nav />
+            <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-6">{children}</main>
+            <Footer />
+          </LocaleProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

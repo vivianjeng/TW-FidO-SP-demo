@@ -64,7 +64,7 @@ export default function ResultPage() {
   const signedSet = result?.response?.result?.signed_response_set;
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-3xl mx-auto">
       <div>
         <h1 className="text-2xl font-semibold">{t("result.title")}</h1>
         <p className="text-sm opacity-70 mt-1">{t("result.subtitle")}</p>
